@@ -31,7 +31,7 @@ GLenum	error;		// OpenGL Error Code
 
 
 //Please see .//Assets//Textures// for more textures
-const string filename = ".//Assets//Textures//minecraft.tga";
+const string filename = ".//Assets//Textures//cube_wip.tga";
 
 int width;						// Width of texture
 int height;						// Height of texture
@@ -39,8 +39,8 @@ int comp_count;					// Component of texture
 
 unsigned char* img_data;		// image data
 
-mat4 mvp, projection, 
-		view, model;			// Model View Projection
+mat4 mvp, mvp1, mvp2, projection, 
+		view, model, model1, model2;			// Model View Projection
 
 Font font;						// Game font
 
@@ -197,8 +197,7 @@ void Game::initialize()
 	if (!(!glewInit())) { DEBUG_MSG("glewInit() failed"); }
 
 	// Copy UV's to all faces
-	for (int i = 1; i < 6; i++)
-		memcpy(&uvs[i * 4 * 2], &uvs[0], 2 * 4 * sizeof(GLfloat));
+	
 
 	DEBUG_MSG(glGetString(GL_VENDOR));
 	DEBUG_MSG(glGetString(GL_RENDERER));
@@ -270,7 +269,7 @@ void Game::initialize()
 		"out vec4 fColor;"
 		""
 		"void main() {"
-		"	fColor = color - texture2D(f_texture, uv);"
+		"	fColor = texture2D(f_texture, uv);"
 		""
 		"}"; //Fragment Shader Src
 
@@ -356,9 +355,9 @@ void Game::initialize()
 
 	// Camera Matrix
 	view = lookAt(
-		vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
+		vec3(0.0f, -4.0f, 10.0f),	// Camera (x,y,z), in World Space
 		vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
-		vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
+		vec3(0.0f, -1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
 		);
 
 	// Model matrix
