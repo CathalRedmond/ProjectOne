@@ -10,7 +10,7 @@ string toString(T number)
 	oss << number;
 	return oss.str();
 }
-
+static const int NUMBER_OF_CUBES = 4;
 GLuint	vsid,		// Vertex Shader ID
 		fsid,		// Fragment Shader ID
 		progID,		// Program ID
@@ -39,8 +39,8 @@ int comp_count;					// Component of texture
 
 unsigned char* img_data;		// image data
 
-mat4 mvp, mvp1, mvp2, projection, 
-		view, model, model1, model2;			// Model View Projection
+mat4 mvp[NUMBER_OF_CUBES], projection, 
+		view, model[NUMBER_OF_CUBES];			// Model View Projection
 
 Font font;						// Game font
 
@@ -89,26 +89,16 @@ void Game::run()
 
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 			{
-				// Set Model Rotation
-				if (!animate)
-				{
-					animate = true;
-					if (rotation < 0)
-						rotation *= -1; // Set Positive
-					animation = glm::vec3(0, 1, 0); //Rotate Y
-				}
+
+				model[3] = translate(model[3], glm::vec3(.05, 0, 0));
+				playerPos.x += 0.05;
 			}
 
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 			{
-				// Set Model Rotation
-				if (!animate)
-				{
-					animate = true;
-					if (rotation >= 0)
-						rotation *= -1; // Set Negative
-					animation = glm::vec3(0, 1, 0); //Rotate Y
-				}
+				model[3] = translate(model[3], glm::vec3(-.05, 0, 0));
+				playerPos.x += -0.05;
+
 
 				// https://www.sfml-dev.org/documentation/2.0/classsf_1_1Clock.php
 				// https://github.com/acron0/Easings
@@ -156,26 +146,16 @@ void Game::run()
 				model = rotate(model, temp, glm::vec3(0, 1, 0)); // Rotate
 				*/
 			}
+			//for (int index = 0; index < 12; index++)
+			//{
 
+			//}
+		
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 			{
-				// Set Model Rotation
-				model = rotate(model, -0.01f, glm::vec3(1, 0, 0)); // Rotate
+				firing = true;
 			}
 
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-			{
-				// Set Model Rotation
-				model = rotate(model, 0.01f, glm::vec3(1, 0, 0)); // Rotate
-			}
-
-			if (animate)
-			{
-				rotation += (1.0f * rotation) + 0.05f;
-				model = rotate(model, 0.01f, animation); // Rotate
-				rotation = 0.0f;
-				animate = false;
-			}
 		}
 		update();
 		render();
@@ -229,6 +209,7 @@ void Game::initialize()
 		"out vec2 uv;"
 		""
 		"uniform mat4 sv_mvp;"
+		"uniform mat4 sv_mvp2;"
 		"uniform float sv_x_offset;"
 		"uniform float sv_y_offset;"
 		"uniform float sv_z_offset;"
@@ -239,6 +220,7 @@ void Game::initialize()
 		//"	gl_Position = vec4(sv_position, 1);"
 		"	gl_Position = sv_mvp * vec4(sv_position.x + sv_x_offset, sv_position.y + sv_y_offset, sv_position.z + sv_z_offset, 1 );"
 		"}"; //Vertex Shader Src
+
 
 	DEBUG_MSG("Setting Up Vertex Shader");
 
@@ -361,9 +343,20 @@ void Game::initialize()
 		);
 
 	// Model matrix
-	model = mat4(
+	model[0] = mat4(
 		1.0f					// Identity Matrix
+	); 
+	model[1] = mat4(
+			1.0f					// Identity Matrix
+		); 
+	model[2] = mat4(
+			1.0f					// Identity Matrix
 		);
+	model[3] = mat4(
+		1.0f					// Identity Matrix
+	);
+
+	
 
 	// Enable Depth Test
 	glEnable(GL_DEPTH_TEST);
@@ -372,6 +365,14 @@ void Game::initialize()
 
 	// Load Font
 	font.loadFromFile(".//Assets//Fonts//BBrick.ttf");
+
+
+
+
+
+	npcPos[0] = vec3(0.0,0.0,-5.0);
+	npcPos[1] = vec3(-5.0, 0.0 , -5.0);
+	npcPos[2] = vec3(5.0, 0.0, -5.0);
 }
 
 void Game::update()
@@ -382,11 +383,71 @@ void Game::update()
 	// Update Model View Projection
 	// For mutiple objects (cubes) create multiple models
 	// To alter Camera modify view & projection
-	mvp = projection * view * model;
+	mvp[0] = projection * view * model[0];
+	mvp[1] = projection * view * model[1];
+	mvp[2] = projection * view * model[2];
+	mvp[3] = projection * view * model[3];
 
-	DEBUG_MSG(model[0].x);
-	DEBUG_MSG(model[0].y);
-	DEBUG_MSG(model[0].z);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
+	{
+		DEBUG_MSG(model[0][0].x);
+		DEBUG_MSG(model[0][0].y);
+		DEBUG_MSG(model[0][0].z);
+
+
+		DEBUG_MSG(model[1][0].x);
+		DEBUG_MSG(model[1][0].y);
+		DEBUG_MSG(model[1][0].z);
+	}
+
+	
+	
+	
+	if (playerPos.z < npcPos[0].z)
+	{
+		// player no longer moving
+		firing = false;
+		
+		
+		for (int index = 0; index < moveCounter; index++)
+		{
+			// resets cube to intial z position
+			model[3] = translate(model[3], glm::vec3(0, 0, 0.05));
+		}
+
+		// bool on if cube is hit
+		bool cubeHit = false;
+		for (int index = 0; index < 3; index++)
+		{
+			// circle collision detection
+			if ((sqrt(((playerPos.x - npcPos[index].x)*(playerPos.x - npcPos[index].x))+((playerPos.y - npcPos[index].y)*(playerPos.y - npcPos[index].y)))) < 1.5)
+			{
+				score += 100;
+				cubeHit = true;
+			}
+		}
+		if (!cubeHit)
+		{
+			lives--;
+		}
+		//reset player position
+		playerPos = vec3(playerPos.x, playerPos.y, 5.0);
+		moveCounter = 0;
+	}
+	// update player cube positon
+	if (firing)
+	{
+		model[3] = translate(model[3], glm::vec3(0, 0, -0.05));
+		playerPos.z += -0.05;
+		moveCounter++;
+	}
+
+	// if lives less than 0 game is over
+	if (lives <= 0)
+	{
+		window.close();
+	}
+
 }
 
 void Game::render()
@@ -406,15 +467,14 @@ void Game::render()
 	int x = Mouse::getPosition(window).x;
 	int y = Mouse::getPosition(window).y;
 
-	string hud = "Heads Up Display ["
-		+ string(toString(x))
-		+ "]["
-		+ string(toString(y))
-		+ "]";
+	string hud = "Lives: "
+		+ string(toString(lives))
+		+ "  Score: "
+		+ string(toString(score));
 
 	Text text(hud, font);
 
-	text.setColor(sf::Color(255, 255, 255, 170));
+	text.setColor(sf::Color(0, 255, 0, 170));
 	text.setPosition(50.f, 50.f);
 
 	window.draw(text);
@@ -423,7 +483,44 @@ void Game::render()
 	// https://www.sfml-dev.org/documentation/2.0/classsf_1_1RenderTarget.php#a8d1998464ccc54e789aaf990242b47f7
 
 	window.popGLStates();
+	
 
+	
+	for (int index = 0; index < 4; index++)
+	{
+		drawCube(index);
+	}
+	
+
+
+
+
+	// Check for OpenGL Error code
+	error = glGetError();
+	if (error != GL_NO_ERROR) {
+		DEBUG_MSG(error);
+	}
+}
+
+void Game::unload()
+{
+#if (DEBUG >= 2)
+	DEBUG_MSG("Cleaning up...");
+#endif
+	glDetachShader(progID, vsid);	// Shader could be used with more than one progID
+	glDetachShader(progID, fsid);	// ..
+	glDeleteShader(vsid);			// Delete Vertex Shader
+	glDeleteShader(fsid);			// Delete Fragment Shader
+	glDeleteProgram(progID);		// Delete Shader
+	glDeleteBuffers(1, &vbo);		// Delete Vertex Buffer
+	glDeleteBuffers(1, &vib);		// Delete Vertex Index Buffer
+	stbi_image_free(img_data);		// Free image stbi_image_free(..)
+}
+
+
+
+void Game::drawCube(int t_index)
+{
 	// Rebind Buffers and then set SubData
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vib);
@@ -448,6 +545,8 @@ void Game::render()
 	mvpID = glGetUniformLocation(progID, "sv_mvp");
 	if (mvpID < 0) { DEBUG_MSG("mvpID not found"); }
 
+
+
 	x_offsetID = glGetUniformLocation(progID, "sv_x_offset");
 	if (x_offsetID < 0) { DEBUG_MSG("x_offsetID not found"); }
 
@@ -458,12 +557,34 @@ void Game::render()
 	if (z_offsetID < 0) { DEBUG_MSG("z_offsetID not found"); };
 
 	// VBO Data....vertices, colors and UV's appended
-	glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), vertices);
-	glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
-	glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+	switch (t_index)
+	{
+	case 0:
+		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
+		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+		break;
+	case 1:
+		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
+		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+		break;
+	case 2:
+		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
+		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+		break;
+	case 3:
+		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), playerVertices);
+		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+		break;
+	default:
+		break;
+	}
 
 	// Send transformation to shader mvp uniform [0][0] is start of array
-	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[t_index][0][0]);
 
 	// Set Active Texture .... 32 GL_TEXTURE0 .... GL_TEXTURE31
 	glActiveTexture(GL_TEXTURE0);
@@ -471,23 +592,45 @@ void Game::render()
 
 	// Set the X, Y and Z offset (this allows for multiple cubes via different shaders)
 	// Experiment with these values to change screen positions
-	glUniform1f(x_offsetID, 0.00f);
+	switch (t_index)
+	{
+	case 0:	
+		glUniform1f(x_offsetID, 0.00f);
+		glUniform1f(z_offsetID, -5.00f);
+		break;
+	case 1:	
+		glUniform1f(x_offsetID, -5.00f);
+		glUniform1f(z_offsetID, -5.00f);
+		break;
+	case 2:	
+		glUniform1f(x_offsetID, 5.00f);
+		glUniform1f(z_offsetID, -5.00f);
+		break; 
+	case 3:	
+		glUniform1f(x_offsetID, 0.00f);
+		glUniform1f(z_offsetID, 5.00f);
+		break;
+	default:
+		break;
+	}
+
 	glUniform1f(y_offsetID, 0.00f);
-	glUniform1f(z_offsetID, 0.00f);
+
 
 	// Set pointers for each parameter (with appropriate starting positions)
 	// https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
 	glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * VERTICES * sizeof(GLfloat)));
 	glVertexAttribPointer(uvID, 2, GL_FLOAT, GL_FALSE, 0, (VOID*)(((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat)));
-	
+
 	// Enable Arrays
 	glEnableVertexAttribArray(positionID);
 	glEnableVertexAttribArray(colorID);
 	glEnableVertexAttribArray(uvID);
 
-	// Draw Element Arrays
+
 	glDrawElements(GL_TRIANGLES, 3 * INDICES, GL_UNSIGNED_INT, NULL);
+
 	window.display();
 
 	// Disable Arrays
@@ -501,26 +644,5 @@ void Game::render()
 
 	// Reset the Shader Program to Use
 	glUseProgram(0);
-
-	// Check for OpenGL Error code
-	error = glGetError();
-	if (error != GL_NO_ERROR) {
-		DEBUG_MSG(error);
-	}
-}
-
-void Game::unload()
-{
-#if (DEBUG >= 2)
-	DEBUG_MSG("Cleaning up...");
-#endif
-	glDetachShader(progID, vsid);	// Shader could be used with more than one progID
-	glDetachShader(progID, fsid);	// ..
-	glDeleteShader(vsid);			// Delete Vertex Shader
-	glDeleteShader(fsid);			// Delete Fragment Shader
-	glDeleteProgram(progID);		// Delete Shader
-	glDeleteBuffers(1, &vbo);		// Delete Vertex Buffer
-	glDeleteBuffers(1, &vib);		// Delete Vertex Index Buffer
-	stbi_image_free(img_data);		// Free image stbi_image_free(..)
 }
 

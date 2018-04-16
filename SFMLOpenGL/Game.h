@@ -41,6 +41,21 @@ private:
 	void update();
 	void render();
 	void unload();
+
+	// player pos in vec3
+	vec3 playerPos = vec3(0.0,0.0,5.0);
+
+	// npcPos in vec3
+	vec3 npcPos[3];
+
+	// counter for how far player cube has moved in the z direction
+	int moveCounter = 0;
+
+	// boool for if player is moving
+	bool firing{ false };
+	float score = 0;
+	float lives = 3;
+	void drawCube(int t_index);
 };
 
 #endif  // ! GAME_H

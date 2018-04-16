@@ -29,12 +29,14 @@
 
 const int VERTICES	= 24;	// Total Number of Vertices
 const int INDICES	= 12;	// Total Number of Indexes
-const int UVS		= 48;	// Total Number of UVs
+const int UVS		= 44;	// Total Number of UVs
 const int COLORS	= 24;	// Total Number of Colors
 
-static const GLfloat vertices[] =
+
+
+static const GLfloat npcVertices[] =
 {
-	// Front Face
+		// Front Face
 	-1.00f, -1.00f,  1.00f,	// [0]	// ( 0)
 	 1.00f, -1.00f,  1.00f,	// [1]	// ( 1)
 	 1.00f,  1.00f,  1.00f,	// [2]	// ( 2)
@@ -71,6 +73,50 @@ static const GLfloat vertices[] =
 	 1.00f,  1.00f,  1.00f, // [2]	// (23)
 };
 
+
+
+static const GLfloat playerVertices[] =
+{
+		// Front Face
+	-0.50f, -0.50f, 0.50f,	// [0]	// ( 0)
+	0.50f, -0.50f,  0.50f,	// [1]	// ( 1)
+	0.50f,  0.50f,  0.50f,	// [2]	// ( 2)
+	-0.50f, 0.50f,  0.50f,	// [3]	// ( 3)
+
+	// Top Face
+	-0.50f,  0.50f,  0.50f,	// [3]	// ( 4)
+	0.50f,  0.50f,  0.50f,	// [2]	// ( 5)
+	0.50f,  0.50f, -0.50f,	// [6]	// ( 6)
+	-0.50f,  0.50f, -0.50f,	// [7]	// ( 7)
+
+	// Back Face
+	0.50f, -0.50f, -0.50f,	// [5]	// ( 8)
+	-0.50f, -0.50f, -0.50f, // [4]	// ( 9)
+	-0.50f,  0.50f, -0.50f,	// [7]	// (10)
+	0.50f,  0.50f, -0.50f,	// [6]	// (11)
+
+	// Bottom Face
+	-0.50f, -0.50f, -0.50f, // [4]	// (12)
+	0.50f, -0.50f, -0.50f, // [5]	// (13)
+	0.50f, -0.50f,  0.50f, // [1]	// (14)
+	-0.50f, -0.50f,  0.50f, // [0]	// (15)
+
+	// Left Face
+	-0.50f, -0.50f, -0.50f, // [4]	// (16)
+	-0.50f, -0.50f,  0.50f, // [0]	// (17)
+	-0.50f,  0.50f,  0.50f, // [3]	// (18)
+	-0.50f,  0.50f, -0.50f, // [7]	// (19)
+
+	// Right Face
+	0.50f, -0.50f,  0.50f, // [1]	// (20)
+	0.50f, -0.50f, -0.50f, // [5]	// (21)
+	0.50f,  0.50f, -0.50f, // [6]	// (22)
+	0.50f,  0.50f,  0.50f, // [2]	// (23)
+};
+
+
+
+
 static const GLfloat colors[] = {
 	
 	// Front Face
@@ -86,9 +132,9 @@ static const GLfloat colors[] = {
 	0.0f, 1.0f, 0.0f, 1.0f, // [7]	// ( 7)
 
 	// Back Face
-	0.0f, 0.0f, 1.0f, 1.0f, // [5]	// ( 8)
+	0.0f, 0.0f, 1.0f, 1.0f, // [5]	// ( 4)
 	0.0f, 0.0f, 1.0f, 1.0f, // [4]	// ( 9)
-	0.0f, 0.0f, 1.0f, 1.0f, // [7]	// (10)
+	0.0f, 0.0f, 1.0f, 1.0f, // [7]	// (6)
 	0.0f, 0.0f, 1.0f, 1.0f, // [6]	// (11)
 
 	// Bottom Face
@@ -100,7 +146,7 @@ static const GLfloat colors[] = {
 	// Left Face
 	1.0f, 1.0f, 0.0f, 1.0f, // [4]	// (16)
 	1.0f, 1.0f, 0.0f, 1.0f, // [0]	// (17)
-	1.0f, 1.0f, 0.0f, 1.0f, // [3]	// (18)
+	1.0f, 1.0f, 0.0f, 1.0f, // [3]	// (14)
 	1.0f, 1.0f, 0.0f, 1.0f, // [7]	// (19)
 
 	// Right Face
@@ -109,6 +155,7 @@ static const GLfloat colors[] = {
 	1.0f, 0.0f, 1.0f, 1.0f, // [6]	// (22)
 	1.0f, 0.0f, 1.0f, 1.0f, // [2]	// (23)
 };
+
 
 GLfloat uvs[2 * 4 * 6] = {
 	// Front Face (other faces populated in initialisation)
@@ -148,6 +195,8 @@ GLfloat uvs[2 * 4 * 6] = {
 	0.66, 0.5,
 };
 
+
+
 static const GLuint indices[] =
 {
 	// Front Face
@@ -174,6 +223,8 @@ static const GLuint indices[] =
 	20, 21, 22,
 	22, 23, 20
 };
+
+
 
 #endif
 
