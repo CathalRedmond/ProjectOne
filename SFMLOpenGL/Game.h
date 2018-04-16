@@ -54,7 +54,7 @@ private:
 	// boool for if player is moving
 	bool firing{ false };
 	float score = 0;
-	float lives = 3;
+	float lives = 5;
 	void drawCube(int t_index);
 };
 

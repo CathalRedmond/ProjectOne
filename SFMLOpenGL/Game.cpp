@@ -398,6 +398,16 @@ void Game::update()
 		DEBUG_MSG(model[1][0].x);
 		DEBUG_MSG(model[1][0].y);
 		DEBUG_MSG(model[1][0].z);
+
+
+		DEBUG_MSG(model[2][0].x);
+		DEBUG_MSG(model[2][0].y);
+		DEBUG_MSG(model[2][0].z);
+
+
+		DEBUG_MSG(model[3][0].x);
+		DEBUG_MSG(model[3][0].y);
+		DEBUG_MSG(model[3][0].z);
 	}
 
 	
@@ -420,7 +430,7 @@ void Game::update()
 		for (int index = 0; index < 3; index++)
 		{
 			// circle collision detection
-			if ((sqrt(((playerPos.x - npcPos[index].x)*(playerPos.x - npcPos[index].x))+((playerPos.y - npcPos[index].y)*(playerPos.y - npcPos[index].y)))) < 1.5)
+			if ((sqrt(((playerPos.x - npcPos[index].x)*(playerPos.x - npcPos[index].x))+((playerPos.y - npcPos[index].y)*(playerPos.y - npcPos[index].y)))) < 1.5 && index == 0)
 			{
 				score += 100;
 				cubeHit = true;
@@ -562,22 +572,22 @@ void Game::drawCube(int t_index)
 	case 0:
 		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
 		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
-		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs1);
 		break;
 	case 1:
 		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
 		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
-		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs2);
 		break;
 	case 2:
 		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
 		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
-		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs3);
 		break;
 	case 3:
 		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), playerVertices);
 		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
-		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs1);
 		break;
 	default:
 		break;
