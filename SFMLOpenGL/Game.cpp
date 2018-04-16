@@ -91,13 +91,13 @@ void Game::run()
 			{
 
 				model[3] = translate(model[3], glm::vec3(.05, 0, 0));
-				playerPos.x += 0.05;
+				m_player.changePosition(vec3(0.05,0.0,0.0));
 			}
 
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 			{
 				model[3] = translate(model[3], glm::vec3(-.05, 0, 0));
-				playerPos.x += -0.05;
+				m_player.changePosition(vec3(- 0.05,0.0,0.0));
 
 
 				// https://www.sfml-dev.org/documentation/2.0/classsf_1_1Clock.php
@@ -155,6 +155,11 @@ void Game::run()
 			{
 				firing = true;
 			}
+			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+			{
+				m_player.setPosition(vec3(m_player.getPosition().x, m_player.getPosition().y, 5.0));
+
+			}
 
 		}
 		update();
@@ -170,6 +175,7 @@ void Game::run()
 
 void Game::initialize()
 {
+	m_player.setPosition(vec3(0.0, 0.0, 5.0));
 	isRunning = true;
 	GLint isCompiled = 0;
 	GLint isLinked = 0;
@@ -251,7 +257,7 @@ void Game::initialize()
 		"out vec4 fColor;"
 		""
 		"void main() {"
-		"	fColor = texture2D(f_texture, uv);"
+		"	fColor = color - texture2D(f_texture, uv);"
 		""
 		"}"; //Fragment Shader Src
 
@@ -370,9 +376,15 @@ void Game::initialize()
 
 
 
-	npcPos[0] = vec3(0.0,0.0,-5.0);
-	npcPos[1] = vec3(-5.0, 0.0 , -5.0);
-	npcPos[2] = vec3(5.0, 0.0, -5.0);
+	m_NPC.setPosition(vec3(0.0,0.0,-5.0), 0);
+	m_NPC.setPosition(vec3(-5.0, 0.0 , -5.0),1);
+	m_NPC.setPosition(vec3(5.0, 0.0, -5.0),2);
+
+	m_NPC.setColourIndex(RED,0);
+	m_NPC.setColourIndex(BLUE,1);
+	m_NPC.setColourIndex(GREEN,2);
+
+	m_player.setColourIndex(RED);
 }
 
 void Game::update()
@@ -413,7 +425,7 @@ void Game::update()
 	
 	
 	
-	if (playerPos.z < npcPos[0].z)
+	if (m_player.getPosition().z < m_NPC.getPosition(RED).z || m_player.getPosition().z < m_NPC.getPosition(BLUE).z || m_player.getPosition().z < m_NPC.getPosition(GREEN).z)
 	{
 		// player no longer moving
 		firing = false;
@@ -430,10 +442,13 @@ void Game::update()
 		for (int index = 0; index < 3; index++)
 		{
 			// circle collision detection
-			if ((sqrt(((playerPos.x - npcPos[index].x)*(playerPos.x - npcPos[index].x))+((playerPos.y - npcPos[index].y)*(playerPos.y - npcPos[index].y)))) < 1.5 && index == 0)
+			if ((sqrt(((m_player.getPosition().x - m_NPC.getPosition(index).x)*(m_player.getPosition().x - m_NPC.getPosition(index).x))+((m_player.getPosition().y - m_NPC.getPosition(index).y)*(m_player.getPosition().y - m_NPC.getPosition(index).y)))) < 1.5)
 			{
-				score += 100;
-				cubeHit = true;
+				if (m_player.getColourIndex() == m_NPC.getColourIndex(index))
+				{
+					score += 100;
+					cubeHit = true;
+				}
 			}
 		}
 		if (!cubeHit)
@@ -441,14 +456,20 @@ void Game::update()
 			lives--;
 		}
 		//reset player position
-		playerPos = vec3(playerPos.x, playerPos.y, 5.0);
+		m_player.setPosition(vec3(m_player.getPosition().x, m_player.getPosition().y, 5.0));
 		moveCounter = 0;
+
+		m_player.setColourIndex(m_player.getColourIndex() + 1);
+		if (m_player.getColourIndex() == 3)
+		{
+			m_player.setColourIndex(0);
+		}
 	}
 	// update player cube positon
 	if (firing)
 	{
 		model[3] = translate(model[3], glm::vec3(0, 0, -0.05));
-		playerPos.z += -0.05;
+		m_player.setPosition(vec3(m_player.getPosition().x, m_player.getPosition().y,m_player.getPosition().z -0.05));
 		moveCounter++;
 	}
 
@@ -571,22 +592,37 @@ void Game::drawCube(int t_index)
 	{
 	case 0:
 		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
-		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), redColors);
 		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs1);
 		break;
 	case 1:
 		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
-		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), blueColors);
 		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs2);
 		break;
 	case 2:
 		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), npcVertices);
-		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), greenColors);
 		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs3);
 		break;
 	case 3:
 		glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), playerVertices);
-		glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+		switch (m_player.getColourIndex())
+		{
+		case RED:
+			glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), redColors);
+			break;
+		case GREEN:
+			glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), greenColors);
+			break;
+		case BLUE:
+			glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), blueColors);
+			break;
+		default:
+			glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), redColors);
+			break;
+		}
+		
 		glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs1);
 		break;
 	default:

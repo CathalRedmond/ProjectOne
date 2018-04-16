@@ -19,6 +19,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include "Player.h"
+#include "NPC.h"
+
 using namespace std;
 using namespace sf;
 using namespace glm;
@@ -42,11 +45,13 @@ private:
 	void render();
 	void unload();
 
-	// player pos in vec3
-	vec3 playerPos = vec3(0.0,0.0,5.0);
+	Player m_player;
 
-	// npcPos in vec3
-	vec3 npcPos[3];
+	NPC m_NPC;
+
+	static const int RED = 0;
+	static const int BLUE = 1;
+	static const int GREEN = 2;
 
 	// counter for how far player cube has moved in the z direction
 	int moveCounter = 0;
