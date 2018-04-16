@@ -640,8 +640,10 @@ void Game::drawCube(int t_index)
 
 
 	glDrawElements(GL_TRIANGLES, 3 * INDICES, GL_UNSIGNED_INT, NULL);
-
-	window.display();
+	if (t_index == 3)
+	{
+		window.display();
+	}
 
 	// Disable Arrays
 	glDisableVertexAttribArray(positionID);
